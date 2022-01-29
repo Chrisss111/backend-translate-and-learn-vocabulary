@@ -35,7 +35,71 @@ def handle_vocablists():
 
     #     return jsonify({"vocablist":{"vocablist_id": new_vocablist.id, "text": new_vocablist.text, "name": new_vocablist.name}}), 201
 
-    if request.method == "GET":
+    # to save/post vocab list and all its words
+    if request.method == "POST":
+
+        request_body = request.get_json()
+
+        new_vocablist = Vocablist(name=request_body["name"], text=request_body["text"])
+
+        db.session.add(new_vocablist)
+        db.session.commit()
+        
+        # request body is a dictionary
+        # if len(request_body["message"]) > 40:
+        #     return jsonify(details="Message length must be 40 characters or less"), 400
+
+        words_response = []
+
+    # new vocab list is object not dictionary
+
+        for word in request_body["words"]:
+            new_word = Word(selected_word=word
+            ["selected_word"], translation=word["translation"], notes=word["notes"], link=word["link"], language=word["language"], vocablist_id=new_vocablist.id)
+
+            db.session.add(new_word)
+            db.session.commit()
+
+            words_response.append({
+                "id": word.id,
+                "selected_word": word.selected_word,
+                "translation": word.translation,
+                "notes": word.notes,
+                "link": word.link,
+                "language": word.language,
+                "vocablist_id": word.vocablist_id
+            })
+            
+        # vocablist_response = {"vocablist": {"id":new_vocablist.id, "name": new_vocablist.name, "text": new_vocablist.text}}
+            
+    # information give in request body to database
+        # {"vocablist": {"name": vocablist.name, "text": vocablist.text},
+        # "words": [{
+        #         "selected_word" : word.selected_word,
+        #         "translation" : word.translation,
+        #         "notes" : word.notes,
+        #         "link" : word.link,
+        #         "language" : word.language,
+        #         "vocablist_id": word.vocablist_id
+        #     },
+        #     {
+        #         "selected_word" : word.selected_word,
+        #         "translation" : word.translation,
+        #         "notes" : word.notes,
+        #         "link" : word.link,
+        #         "language" : word.language,
+        #         "vocablist_id": word.vocablist_id
+        #     }
+            
+        # ]}
+        
+
+        
+
+        return jsonify({"vocablist": {"id":new_vocablist.id, "name": new_vocablist.name, "text": new_vocablist.text}, "words": words_response}), 201
+
+    # Use this endpoint's GET request to just get a list of vocab list names (to display on select a vocab list page)
+    if request.method == "GET": 
         vocablists = Vocablist.query.all()
         vocablists_response = []
         for vocablist in vocablists:
@@ -58,40 +122,13 @@ def handle_vocablists():
 
 # vocablists/vocablist_id/words
 
-@vocablists_bp.route("/<id>/words", methods=["GET", "POST", "DELETE"])
+@vocablists_bp.route("/<id>/words", methods=["GET", "DELETE"])
 def handle_vocablists_words(id):
     vocablist = Vocablist.query.get(id)
 
-    if request.method == "POST":
-        request_body = request.get_json()
-        # if len(request_body["message"]) > 40:
-        #     return jsonify(details="Message length must be 40 characters or less"), 400
-
-        words_response = []
-
-        new_word = Word(message=request_body["message"], likes_count=0, board=board)
-
-        for word in words:
-            words_response.append({
-                "id" : word.id,
-                "selected_word" : word.selected_word,
-                "translation" : word.translation,
-                "notes" : word.notes,
-                "link" : word.link,
-                "language" : word.language,
-                "vocablist_id": word.vocablist_id
-            })
-        
-            db.session.add(new_word)
-
-
-        new_vocablist = Vocablist(name=request_body["name"], text=request_body["text"])
-
-        db.session.add(new_vocablist)
-        db.session.commit()
-
-        return jsonify({"card":{"board_id": new_card.board_id, "card_id": new_card.id, "likes_count": new_card.likes_count, "message": new_card.message}}), 201
+    #CREATE DELETE ROUTE-so if hit delete button will delete all words and text associated with vocab list ID
     
+    #call to use to get all info needed to display a specific vocab list
     if request.method == "GET":
         
         words = vocablist.words 
@@ -108,7 +145,7 @@ def handle_vocablists_words(id):
                 "vocablist_id": word.vocablist_id
             })
         
-        return jsonify(words_response), 200
+        return jsonify({"vocablist": {"id":vocablist.id, "name": vocablist.name, "text": vocablist.text}, "words": words_response}), 200
 
 # @cards_bp.route("/<id>", methods=["DELETE", "PATCH"])
 # def handle_cards(id):
