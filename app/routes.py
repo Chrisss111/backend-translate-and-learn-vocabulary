@@ -1,3 +1,4 @@
+from urllib import response
 from flask import Blueprint, request, jsonify, make_response
 from app import db
 from app.models.vocablist import Vocablist
@@ -145,22 +146,42 @@ def handle_vocablists():
 @vocablists_bp.route("/<id>/words", methods=["GET", "DELETE"])
 def handle_vocablists_words(id):
     vocablist = Vocablist.query.get(id)
+    words = vocablist.words 
 
+    print(words) #array of instances
     #CREATE DELETE ROUTE-so if hit delete button will delete all words and text associated with vocab list ID
     
+    
+    if request.method == "DELETE":
+        for word in words:
+            db.session.delete(word)
+        # db.session.commit()
+        db.session.delete(vocablist)
+        db.session.commit()
+        return make_response(f"Vocablist #{id} and all words associated with it successfully deleted")
+
     #call to use to get all info needed to display a specific vocab list
     if request.method == "GET":
         
-        words = vocablist.words 
+        
+        # words=Word.query.filter_by(vocablist_id=id).all() - works as well
+        # words=Word.query.get(vocablist_id=id)
+        # gets following error TypeError: get() got an unexpected keyword argument 'vocablist_id'
+        # print(type(words))
+        
+        # print(type(words)) #words is a class instance
         words_response = []
 
+        # breakpoint()
+
         for word in words:
+            print(type(word))
             words_response.append({
                 "id": word.id,
                 "selected_word": word.selected_word,
                 "translation": word.translation,
-                "notes" : word.notes,
-                "link" : word.link,
+                "notes": word.notes,
+                "link": word.link,
                 "language": word.language,
                 "vocablist_id": word.vocablist_id
             })
@@ -181,5 +202,25 @@ def handle_vocablists_words(id):
 #         db.session.commit()
 
 #         return jsonify({"likes_count": card.likes_count }), 200
+
+@words_bp.route("", methods=["GET", "POST"])
+def handle_words():
+    if request.method=="GET":
+        words = Word.query.all()
+
+        words_response=[]
+
+        for word in words:
+            words_response.append({
+                "id": word.id,
+                "selected_word": word.selected_word,
+                "translation": word.translation,
+                "notes": word.notes,
+                "link": word.link,
+                "language": word.language,
+                "vocablist_id": word.vocablist_id
+            })
+
+        return jsonify(words_response)
 
 
