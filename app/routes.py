@@ -40,7 +40,7 @@ def handle_vocablists():
 
         request_body = request.get_json()
 
-        new_vocablist = Vocablist(name=request_body["name"], text=request_body["text"])
+        new_vocablist = Vocablist(name=request_body["vocablist"]["name"], text=request_body["vocablist"]["text"])
 
         db.session.add(new_vocablist)
         db.session.commit()
@@ -53,23 +53,43 @@ def handle_vocablists():
 
     # new vocab list is object not dictionary
 
+        
         for word in request_body["words"]:
             new_word = Word(selected_word=word
             ["selected_word"], translation=word["translation"], notes=word["notes"], link=word["link"], language=word["language"], vocablist_id=new_vocablist.id)
-
+            
             db.session.add(new_word)
             db.session.commit()
 
             words_response.append({
-                "id": word.id,
-                "selected_word": word.selected_word,
-                "translation": word.translation,
-                "notes": word.notes,
-                "link": word.link,
-                "language": word.language,
-                "vocablist_id": word.vocablist_id
+                "id": new_word.id,
+                "selected_word": new_word.selected_word,
+                "translation": new_word.translation,
+                "notes": new_word.notes,
+                "link": new_word.link,
+                "language": new_word.language,
+                "vocablist_id": new_word.vocablist_id
             })
-            
+                
+
+            #     for i in range(len(request_body["words"])):
+            # for word in request_body["words"]:
+            #     new_word = Word(selected_word=word[i]
+            #     ["selected_word"], translation=word[i]["translation"], notes=word[i]["notes"], link=word[i]["link"], language=word[i]["language"], vocablist_id=new_vocablist.id)
+                
+
+            #     db.session.add(new_word)
+            #     db.session.commit()
+
+            #     words_response.append({
+            #         "id": word.id,
+            #         "selected_word": word.selected_word,
+            #         "translation": word.translation,
+            #         "notes": word.notes,
+            #         "link": word.link,
+            #         "language": word.language,
+            #         "vocablist_id": word.vocablist_id
+            #     })
         # vocablist_response = {"vocablist": {"id":new_vocablist.id, "name": new_vocablist.name, "text": new_vocablist.text}}
             
     # information give in request body to database
