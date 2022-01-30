@@ -34,5 +34,8 @@ def create_app():
     from .routes import words_bp
     app.register_blueprint(words_bp)
 
+    from .routes import translation_bp
+    app.register_blueprint(translation_bp)
+
     CORS(app)
     return app

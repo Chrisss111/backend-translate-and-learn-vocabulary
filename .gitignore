@@ -110,6 +110,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# JSON file with Google API credentials
+zippy-brand-338723-712f9953c9d5.json
+
 # Spyder project settings
 .spyderproject
 .spyproject
